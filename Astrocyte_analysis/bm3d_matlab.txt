@@ -1,0 +1,7 @@
+tic
+sz = size (dZMax);
+all = zeros(sz(1), sz (2), sz (4), 'single');
+parfor i = 1:sz(4)
+	[NA, all(:,:,i)] = BM3D(1, dZMax(1:sz (1),1:sz (2),1,i));
+end
+toc
