@@ -1,16 +1,11 @@
-﻿Build started 1/7/2015 2:52:36 PM.
-     1>Project "F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\Astrocyte_analysis.vcxproj" on node 2 (Build target(s)).
+﻿Build started 6/7/2015 7:46:13 PM.
+     1>Project "F:\PC\GitHub\Astrocytes\Astrocyte_analysis\Astrocyte_analysis.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /IC:/libs/boost_1_58_0 /I"C:\Program Files\OpenCV\build/include/" /I"C:/Program Files/MATLAB/R2015a/extern/include" /IC:\libs\nana\include /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt astrocyte.cpp clusters.cpp main.cpp morphology.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /sdl /Od /D _MBCS /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc120.pdb" /Gd /TP /errorReport:prompt clusters.cpp
          clusters.cpp
-         Generating Code...
-         Compiling...
-         morphology.cpp
-         main.cpp
-         astrocyte.cpp
-         Generating Code...
+     1>clusters.cpp(204): warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.exe" /INCREMENTAL /NOLOGO /LIBPATH:C:/libs/boost_1_58_0/lib/x64 /LIBPATH:"C:\Program Files\OpenCV\build/x64/vc12/lib" /LIBPATH:"C:/Program Files/MATLAB/R2015a/extern/lib/win64/microsoft" /LIBPATH:C:\libs\nana\build\bin\vc2013 nana_Debug_x64.lib opencv_contrib2410d.lib libmx.lib libeng.lib libmex.lib libmat.lib opencv_video2410d.lib opencv_core2410d.lib opencv_highgui2410d.lib opencv_imgproc2410d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.lib" /MACHINE:X64 x64\Debug\astrocyte.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\PC\GitHub\Astrocytes\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.exe" /INCREMENTAL /NOLOGO nana_Debug_x64.lib opencv_contrib2410d.lib libmx.lib libeng.lib libmex.lib libmat.lib opencv_video2410d.lib opencv_core2410d.lib opencv_highgui2410d.lib opencv_imgproc2410d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"F:\PC\GitHub\Astrocytes\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\PC\GitHub\Astrocytes\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.lib" /MACHINE:X64 x64\Debug\astrocyte.obj
          x64\Debug\clusters.obj
          x64\Debug\auxiliaries.obj
          x64\Debug\config.obj
@@ -19,9 +14,9 @@
          x64\Debug\main.obj
          x64\Debug\morphology.obj
          x64\Debug\saving.obj
-         Astrocyte_analysis.vcxproj -> F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.exe
-     1>Done Building Project "F:\PC\Document Files\UNN\3 course\Coursework\Astrocyte_analysis\Astrocyte_analysis.vcxproj" (Build target(s)).
+         Astrocyte_analysis.vcxproj -> F:\PC\GitHub\Astrocytes\Astrocyte_analysis\x64\Debug\Astrocyte_analysis.exe
+     1>Done Building Project "F:\PC\GitHub\Astrocytes\Astrocyte_analysis\Astrocyte_analysis.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:23.90
+Time Elapsed 00:00:04.54

@@ -19,6 +19,7 @@
 #include <nana/gui/widgets/button.hpp>
 #include <nana/gui/widgets/label.hpp>
 #include <nana/gui/widgets/panel.hpp>
+#include <nana/gui/widgets/checkbox.hpp>
 #include <nana/gui/filebox.hpp>
 
 //#include <opencv2/opencv.hpp>

@@ -43,33 +43,38 @@ inline vector <ushort> dbscan (vector <ushort> & a, int min_points, int eps)
 	return b;
 }
 
-
 listbox::oresolver& operator<<(listbox::oresolver& ores, const vertex & v)
 {
 	return ores << v.key << v.color.rgba ().value << v.start << v.finish << v.len ();
 }
 
-void astrocyte::dialog_clusters (int a, int min_points, int eps, double thr_square, double thr_time)
+void astrocyte::dialog_clusters (segmentation_settings segm)
 {
+	segm_ = segm;
 	my_form.show ();
 
-	calc_clusters (a, min_points, eps, thr_square, thr_time);
+	calc_clusters ();
+
+	my_form.events ().destroy ([this]{
+		delete[] mt;
+	});
 
 	my_form.prepare (intensity.n, intensity.m);
 
-	my_form.dw_clusters.draw ([this, a](paint::graphics& gr)
+	my_form.dw_clusters.draw ([this] (paint::graphics& gr)
 	{
 		my_form.li_components.auto_draw (false);
 
 		if (cur_t != new_t) my_form.li_components.clear (), cur_components.clear ();
-		Mat square (a, a, CV_8UC3);
+		Mat square (segm_.a, segm_.a, CV_8UC3);
 		//memset (pos, 0, motion.nm * sizeof ushort);
 
-		Mat img = intensity.get_mat (new_t), imgc, img_out;
-		applyColorMap (img, imgc, COLORMAP_JET);
+		Mat img = motion.image (new_t), imgc, img_out;
+		//applyColorMap (img, imgc, COLORMAP_JET);
+		cv::cvtColor (img, imgc, CV_GRAY2RGB);
 		imgc.copyTo (img_out);
-		for (int i = 0; i < motion.n - a; i++) {
-			for (int j = 0; j < motion.m - a; j++) {
+		for (int i = 0; i < motion.n - segm_.a; i++) {
+			for (int j = 0; j < motion.m - segm_.a; j++) {
 				int ind = i * motion.m + j;
 				int l = -1, r = (int)graph[ind].size();
 				while (r - l > 1) {
@@ -83,7 +88,7 @@ void astrocyte::dialog_clusters (int a, int min_points, int eps, double thr_squa
 				else if (cur_components.count (cur) == 0) continue;
 				//int color = ((long long)cur * cur * 217313 + 1000000009) % (1 << 24);
 				square.setTo (Scalar (0, 255, 0));
-				Mat tmp = imgc.colRange (j, j + a).rowRange (i, i + a), out = img_out.colRange (j, j + a).rowRange (i, i + a);
+				Mat tmp = imgc.colRange (j, j + segm_.a).rowRange (i, i + segm_.a), out = img_out.colRange (j, j + segm_.a).rowRange (i, i + segm_.a);
 				addWeighted (tmp, 0.5, square, 0.5, 0.0, out);
 			}
 		}
@@ -102,9 +107,10 @@ void astrocyte::dialog_clusters (int a, int min_points, int eps, double thr_squa
 		for (int i = 0; i < cur_img.rows; i++) {
 			for (int j = 0; j < cur_img.cols; j++) {
 				Vec3b color = cur_img.at<Vec3b> (i, j);
-				gr.set_pixel (i, j, nana::color (color[2], color[1], color[0]));
+				gr.set_pixel (j, i, nana::color (color[2], color[1], color[0]));
 			}
 		}
+		gr.rectangle (my_form.roi (), false, color {255, 255, 255});
 		cur_t = new_t;
 	});
 
@@ -124,30 +130,82 @@ void astrocyte::dialog_clusters (int a, int min_points, int eps, double thr_squa
 	});
 
 	my_form.bu_prev.events ().click ([this]{
-		new_t = (cur_t - 1) % motion.nt;
+		new_t = (cur_t + motion.nt - 1) % motion.nt;
 		my_form.dw_clusters.update ();
 		my_form.la_status.caption (STR ("Current time frame = " + to_wstring (cur_t)));
+	});
+
+	// Inerface for dbscan
+	my_form.pic.events ().click ([this](const arg_mouse& arg){
+		my_form.roi (nana::rectangle (arg.pos.x - segm_.a / 2, arg.pos.y - segm_.a / 2, segm_.a, segm_.a));
+		my_form.dw_clusters.update ();
+		my_form.dw_points.update ();
+	});
+	my_form.dw_points.draw ([this](paint::graphics& gr){
+		gr.rectangle (true, { 255, 255, 255 });
+		int ind = (my_form.roi ().y * motion.m + my_form.roi ().x);
+		if (mt[ind].size () == 0) {
+			gr.string ({ 20, 20 }, L"No local maximum");
+			return;
+		}
+		int len = my_form.pic_points.size ().width - 40;
+		int xb = 20;
+		gr.line ({ xb, 20 }, { (int)my_form.pic_points.size ().width - 20, 20 });
+		int center = 0;
+		for (int i = 0; i < mt[ind].size (); i++) {
+			int xg = (len * mt[ind][i]) / motion.nt + xb;
+			//gr.round_rectangle ({ xg, 17, 4, 4 }, 1, 1, { 175, 216, 255 }, true, { 175, 216, 255 });
+			gr.line ({ xg, 17 }, { xg, 21 }, nana::color { 175, 216, 255 });
+			center += mt[ind][i];
+		}
+		center /= (int)mt[ind].size ();
+		gr.round_rectangle ({ center, 17, 5, 5 }, 1, 1, { 160, 255, 134 }, true, { 160, 255, 134 });
+		double dt = 50.0 * (double)motion.nt / len;
+		for (double t = 0; t < motion.nt; t += dt) {
+			int xg = (int)(len * t / motion.nt) + xb;
+			gr.string ({ xg - 5, 20 }, to_wstring ((int)t));
+		}
+		for (auto interval : graph[ind]) {
+			int be = (int)(len * interval.start / motion.nt) + xb, en = (len * interval.finish / motion.nt) + xb;
+			gr.line ({ be, 15 }, { en, 15 }, nana::color { 97, 255, 55 });
+			gr.line ({ be, 14 }, { be, 16 }, nana::color { 255, 55, 55 });
+			gr.line ({ en, 14 }, { en, 16 }, nana::color { 255, 55, 55 });
+		}
+	});
+
+	my_form.bu_select_all.events ().click ([this]{
+		my_form.dw_upd = false;
+		for (auto x : my_form.li_components.at (0)) x.check (true);		
+		my_form.dw_upd = true;
+		my_form.dw_clusters.update ();
+	});
+
+	my_form.bu_deselect_all.events ().click ([this]{
+		my_form.dw_upd = false;
+		for (auto x : my_form.li_components.at (0)) x.check (false);
+		my_form.dw_upd = true;
+		my_form.dw_clusters.update ();
 	});
 }
 
 
-void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square, double thr_time)
+void astrocyte::calc_clusters ()
 {
 	background_subtraction ();
 	//printf ("calc clusters begin\n");
 	// calculate local maximum (mt)
 	my_form.status(STR ("Local maximum calculating..."));
-	int l = 3, r = 3, lr = r + l + 1; // time window [l .. r]
-	vector <ushort>*  mt = new vector <ushort>[motion.nm]; // list of local maximum pixel (i, j) over time // mt = max time
+	int l = 2, r = 2, lr = r + l + 1; // time window [l .. r]
+	mt = new vector <ushort>[motion.nm]; // list of local maximum pixel (i, j) over time // mt = max time
 	for (int t = l; t < motion.nt - r; t++)
 		for (int i = 0; i < motion.n; i++)
 			for (int j = 0; j < motion.m; j++) {
-				uchar cur = motion.get_cell (t, i, j);
+				uchar cur = motion.cell (t, i, j);
 				if (cur < 1) continue;
 				// search maximum from [l .. r] 
-				uchar mxt = motion.get_cell (t + r, i, j);
+				uchar mxt = motion.cell (t + r, i, j);
 				for (int k = t - l; k < t + r; k ++)
-					if (k != t) mxt = max (motion.get_cell (k, i, j), mxt);
+					if (k != t) mxt = max (motion.cell (k, i, j), mxt);
 				
 				// if cur is local maximum => add it 
 				if (mxt <= cur) mt[i * motion.m + j].push_back (t);
@@ -161,15 +219,17 @@ void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square
 	int * offset = new int[motion.nm];
 	bool * ft = new bool[motion.nt]; // true if time is local max for current pixel // ft = found time
 	graph = new vector <vertex>[motion.nm];
-	for (int i = 0; i < motion.n - a; i++)
-		for (int j = 0; j < motion.m - a; j++) {
+	
+	for (int i = 0; i < motion.n - segm_.a; i++)
+		for (int j = 0; j < motion.m - segm_.a; j++) {			
 			int ind = i * motion.m + j;
+			int len = (int)mt[ind].size ();
 			offset[ind] = num;
-			if (mt[ind].size () == 0) continue;
+			if (len == 0) continue;
 			std::memset (ft, false, motion.nt * sizeof (bool));
 			// for all local maximum t in square a * a set true in ft
-			for (int x = i; x < i + a; x++) 
-				for (int y = j; y < j + a; y++) {
+			for (int x = i; x < i + segm_.a; x++)
+				for (int y = j; y < j + segm_.a; y++) {
 					int ind2 = x * motion.m + y;
 					for (int k = 0; k < mt[ind2].size (); k++) ft[mt[ind2][k]] = true;
 				}
@@ -177,7 +237,7 @@ void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square
 			for (int t = 0; t < motion.nt; t++) if (ft[t]) all_locmax.push_back (t);
 			
 			// get clusters with algo DBSCAN
-			vector <ushort> clusters = dbscan (all_locmax, min_points, eps);
+			vector <ushort> clusters = dbscan (all_locmax, segm_.min_points, segm_.eps);
 			vector <vertex> res;
 			// get all begin/end of clusters and add it into res
 			res.push_back ({ -1, all_locmax.front (), -1 });
@@ -188,16 +248,15 @@ void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square
 				}
 			}
 			res.back ().finish = all_locmax.back();
-			//mt[ind] = res; // now mt stores begin/end of clusters of local maxima
-			mt[ind].clear ();
+			mt[ind] = all_locmax;
 			graph[ind] = res;
 			num += (int)res.size ();
 		}
+	// mt now is array of local max in (i, j) by t
 	delete [] ft;
-	delete [] mt;
 	//printf ("clusters calculated\n");
 	
-	// ???!!! mt now is array of vectors of clustered segments for squares a * a with corner in (i, j)
+	
 	// calculate connected component
 	my_form.status (STR ("Connected components calculating..."));
 	
@@ -214,27 +273,27 @@ void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square
 	std::memset (pos, 0, motion.nm * sizeof ushort);
 	for (int t = 0; t < motion.nt; t++) {
 		// update pos (index of segment with end greater than t)
-		for (int i = 0; i < motion.n - a; i++)
-			for (int j = 0; j < motion.m - a; j++) {
+		for (int i = 0; i < motion.n - segm_.a; i++)
+			for (int j = 0; j < motion.m - segm_.a; j++) {
 				int ind = i * motion.m + j;
 				if (pos[ind] < graph[ind].size ()) if (graph[ind][pos[ind]].finish < t) pos[ind] ++;
 			}
 		// implementation of algo
-		for (int i = 0; i < motion.n - a; i++)
-			for (int j = 0; j < motion.m - a; j++) {
+		for (int i = 0; i < motion.n - segm_.a; i++)
+			for (int j = 0; j < motion.m - segm_.a; j++) {
 				int ind = i * motion.m + j;
 				if (pos[ind] >= graph[ind].size () || graph[ind][pos[ind]].start > t) continue; // if segment not cover t : continue
 				ushort be1 = graph[ind][pos[ind]].start, en1 = graph[ind][pos[ind]].finish; // first segment
 				assert (offset[ind] + pos[ind] < num);
-				for (int x = i; x < min (a + i, motion.n - a); x++) {
-					for (int y = j; y < min (a + j, motion.m - a); y++) {
+				for (int x = i; x < min (segm_.a + i, motion.n - segm_.a); x++) {
+					for (int y = j; y < min (segm_.a + j, motion.m - segm_.a); y++) {
 						int ind2 = x * motion.m + y;
 						if (pos[ind2] >= graph[ind2].size () || graph[ind2][pos[ind2]].start > t) continue; // if segment not cover t : continue
-						int s = (a + i - x) * (a + j - y); // overlapping area
+						int s = (segm_.a + i - x) * (segm_.a + j - y); // overlapping area
 						ushort be2 = graph[ind2][pos[ind2]].start, en2 = graph[ind2][pos[ind2]].finish; // second segment
 						int len = max (min (en2, en1) - max (be2, be1) + 1, 0); // overllaping time
 						assert (offset[ind2] + pos[ind2] < num);
-						if (s > a * a * thr_square && len > max (en1 - be1, en2 - be2) * thr_time) // threshold by area and time
+						if (s > segm_.a * segm_.a * segm_.thr_area && len > max (en1 - be1, en2 - be2) * segm_.thr_time) // threshold by area and time
 							ds.union_set (offset[ind] + pos[ind], offset[ind2] + pos[ind2]); // connect vertices of segments
 					}
 				}
@@ -247,8 +306,8 @@ void astrocyte::calc_clusters (int a, int min_points, int eps, double thr_square
 	components.clear ();
 	std::memset (pos, 0, motion.nm * sizeof ushort);
 	for (ushort t = 0; t < motion.nt; t++) {
-		for (int i = 0; i < motion.n - a; i++) {
-			for (int j = 0; j < motion.m - a; j++) {
+		for (int i = 0; i < motion.n - segm_.a; i++) {
+			for (int j = 0; j < motion.m - segm_.a; j++) {
 				int ind = i * motion.m + j;
 				if (pos[ind] < graph[ind].size ()) if (graph[ind][pos[ind]].finish < t) pos[ind] ++;
 				if (pos[ind] >= graph[ind].size () || graph[ind][pos[ind]].start > t) continue; // if segment not cover t : continue

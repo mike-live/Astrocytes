@@ -6,7 +6,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <mat.h>
+//#include <mat.h>
 #include "config.h"
 #include "img_proc.h"
 #include <ctime>

@@ -95,7 +95,7 @@ Mat astrocyte::max_thr (bool gauss)
 	if (thr.empty()) {
 		Mat img_max, img_gauss_max; // intensity.n, intensity.m, intensity.type_size, 0
 		for (int t = 0; t < intensity.nt; t++) {
-			Mat img = intensity.get_mat(t);
+			Mat img = intensity.image(t);
 			if (img_max.empty ()) img_max = img;
 			else img_max = max (img_max, img);
 			GaussianBlur (img, img, cv::Size (3, 3), 1.0, 1.0);
@@ -113,12 +113,12 @@ void astrocyte::preprocessing ()
 {
 	intensity = video_data (new uchar[data.size], data.n, data.m, data.nt, CV_8U);
 	for (int t = 0; t < data.nt; t++) {
-		Mat img (data.n, data.m, data.img_type, data.get_image (t));
+		Mat img = data.image(t);
 		img = min (img, 400);
 		double min_val, max_val;
 		minMaxLoc (img, &min_val, &max_val);
 		img.convertTo (img, CV_8U, 255.0 / (max_val - min_val), -min_val * 255.0 / (max_val - min_val));
-		memcpy (intensity.get_image (t), img.data, data.nm);
+		memcpy (intensity.frame (t), img.data, data.nm);
 	}
 }
 
@@ -133,7 +133,7 @@ void astrocyte::background_subtraction ()
 	Mat fgimg;
 	motion = video_data (new uchar[intensity.size], intensity.n, intensity.m, intensity.nt, CV_8U);
 	for (int t = 0; t < intensity.nt; t++) {
-		Mat img = intensity.get_mat(t), imgc_max, fgmask, img_thr;
+		Mat img = intensity.image(t), imgc_max, fgmask, img_thr;
 
 		applyColorMap (img, imgc_max, COLORMAP_JET);
 		imgc_max.copyTo (img_thr, thr);
@@ -147,7 +147,7 @@ void astrocyte::background_subtraction ()
 		bg_model.getBackgroundImage (bgimg);
 		GaussianBlur (fgimg, fgimg, cv::Size (7, 7), 1.0, 1.0);
 		
-		memcpy (motion.get_image(t), fgimg.data, motion.nm);
+		memcpy (motion.frame(t), fgimg.data, motion.nm);
 	}
 	my_form.status (STR ("Background subtraction calculated"));
 	//printf ("background_subtraction end\n");	

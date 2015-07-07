@@ -89,7 +89,17 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);"C:\Program Files\OpenCV\build\x64\vc12\bin"</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);..\dependencies\lib</LibraryPath>
+    <IncludePath>..\dependencies\include;$(IncludePath)</IncludePath>
+    <ExecutablePath>..\dependencies\bin;$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH)</ExecutablePath>
+    <OutDir>$(SolutionDir)\..\dependencies\bin\</OutDir>
+    <TargetName>$(ProjectName)_debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);..\dependencies\lib</LibraryPath>
+    <IncludePath>..\dependencies\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
+    <OutDir>$(SolutionDir)\..\dependencies\bin\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -109,12 +119,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(BOOST_ROOT);$(OPENCV_ROOT)/include/;$(MATLAB_ROOT)/include;C:\libs\nana\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories> $(BOOST_ROOT)/lib/$(Platform);$(OPENCV_ROOT)/x64/vc12/lib;$(MATLAB_ROOT)/lib/win64/microsoft;C:\libs\nana\build\bin\vc2013;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
       <AdditionalDependencies>nana_$(Configuration)_$(PlatformShortName).lib;opencv_contrib2410d.lib;libmx.lib;libeng.lib;libmex.lib;libmat.lib;opencv_video2410d.lib;opencv_core2410d.lib;opencv_highgui2410d.lib;opencv_imgproc2410d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -142,14 +154,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OPENCV_ROOT)/include/;$(BOOST_ROOT);$(MATLAB_ROOT)/include;C:\libs\nana\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(BOOST_ROOT)/lib/$(Platform);$(OPENCV_ROOT)/x64/vc12/lib;$(MATLAB_ROOT)/lib/win64/microsoft;C:\libs\nana\build\bin\vc2013;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
       <AdditionalDependencies>nana_$(Configuration)_$(PlatformShortName).lib;opencv_contrib2410.lib;libmx.lib;libeng.lib;libmex.lib;libmat.lib;opencv_video2410.lib;opencv_core2410.lib;opencv_highgui2410.lib;opencv_imgproc2410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -18,7 +18,7 @@ auxiliaries - модуль, который включает набор вспомогательных функций
 #include <opencv2/contrib/contrib.hpp>
 #include <opencv2/video/background_segm.hpp>*/
 
-#include <mat.h>
+//#include <mat.h>
 #include "declaration.h"
 using namespace std;
 using namespace cv;
