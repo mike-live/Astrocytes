@@ -88,7 +88,8 @@ void astrocyte::dialog_clusters (segmentation_settings segm)
 				else if (cur_components.count (cur) == 0) continue;
 				//int color = ((long long)cur * cur * 217313 + 1000000009) % (1 << 24);
 				square.setTo (Scalar (0, 255, 0));
-				Mat tmp = imgc.colRange (j, j + segm_.a).rowRange (i, i + segm_.a), out = img_out.colRange (j, j + segm_.a).rowRange (i, i + segm_.a);
+				Mat tmp = imgc.colRange (j, j + segm_.a).rowRange (i, i + segm_.a), 
+					out = img_out.colRange (j, j + segm_.a).rowRange (i, i + segm_.a);
 				addWeighted (tmp, 0.5, square, 0.5, 0.0, out);
 			}
 		}
@@ -115,11 +116,9 @@ void astrocyte::dialog_clusters (segmentation_settings segm)
 	});
 
 	my_form.li_components.events ().checked ([this](const arg_listbox & events){
-		//printf ("listbox event item : %d\n", events.item.value<int>);
 		auto data = events.item.value_ptr<vertex> ();
 		if (!events.selected) { cur_components.erase (data->key); }
 		else { cur_components.insert (data->key); }
-		//printf ("%d %d %d %d %d\n", data->start, data->finish, data->key, data->len (), data->color.rgba ().value);
 		if (my_form.dw_upd) my_form.dw_clusters.update ();
 	});
 
@@ -192,29 +191,32 @@ void astrocyte::dialog_clusters (segmentation_settings segm)
 void astrocyte::calc_clusters ()
 {
 	background_subtraction ();
-	//printf ("calc clusters begin\n");
 	// calculate local maximum (mt)
-	my_form.status(STR ("Local maximum calculating..."));
+	logger->Info(STR ("Local maximum calculating..."));
 	int l = 2, r = 2, lr = r + l + 1; // time window [l .. r]
 	mt = new vector <ushort>[motion.nm]; // list of local maximum pixel (i, j) over time // mt = max time
 	for (int t = l; t < motion.nt - r; t++)
+	{
 		for (int i = 0; i < motion.n; i++)
-			for (int j = 0; j < motion.m; j++) {
-				uchar cur = motion.cell (t, i, j);
+		{
+			for (int j = 0; j < motion.m; j++) 
+			{
+				uchar cur = motion.cell(t, i, j);
 				if (cur < 1) continue;
 				// search maximum from [l .. r] 
-				uchar mxt = motion.cell (t + r, i, j);
-				for (int k = t - l; k < t + r; k ++)
-					if (k != t) mxt = max (motion.cell (k, i, j), mxt);
-				
+				uchar mxt = motion.cell(t + r, i, j);
+				for (int k = t - l; k < t + r; k++)
+				if (k != t) mxt = max(motion.cell(k, i, j), mxt);
+
 				// if cur is local maximum => add it 
-				if (mxt <= cur) mt[i * motion.m + j].push_back (t);
+				if (mxt <= cur) mt[i * motion.m + j].push_back(t);
 			}
+		}
+	}
 	
-	//printf ("local maximum calculated\n");
 	
 	// calculate clusters and offset.
-	my_form.status (STR ("Clusters calculating..."));
+	logger->Info(STR("Clusters calculating..."));
 	int num = 0; // number of all segments
 	int * offset = new int[motion.nm];
 	bool * ft = new bool[motion.nt]; // true if time is local max for current pixel // ft = found time
@@ -254,11 +256,10 @@ void astrocyte::calc_clusters ()
 		}
 	// mt now is array of local max in (i, j) by t
 	delete [] ft;
-	//printf ("clusters calculated\n");
 	
 	
 	// calculate connected component
-	my_form.status (STR ("Connected components calculating..."));
+	logger->Info(STR("Connected components calculating..."));
 	
 	// disjoint_sets stores connected components. for all vertices in one component method "find" return equal value
 	// The time complexity is O(q alpha(q,num)), where alpha is the inverse Ackermann's function, 
@@ -299,10 +300,9 @@ void astrocyte::calc_clusters ()
 				}
 			}
 	}
-	//printf ("connected components calculated\n");
 
 	// calculate for all component begin and end time
-	my_form.status (STR ("Calculating intervals, colors for components..."));
+	logger->Info(STR("Calculating intervals, colors for components..."));
 	components.clear ();
 	std::memset (pos, 0, motion.nm * sizeof ushort);
 	for (ushort t = 0; t < motion.nt; t++) {
@@ -323,17 +323,7 @@ void astrocyte::calc_clusters ()
 	delete[] offset;
 	delete[] rank;
 	delete[] parent;
-	my_form.status (STR ("Calculating end. =)"));
-	//system ("pause");
-	// print to file durations of all events (difference of max)
-	
+	logger->Info(STR("Calculating end. =)"));
 }
 
-
-/*freopen ("d:\\durations.txt", "w", stdout);
-	printf ("%d\n", all.size ());
-	std::vector <std::pair <int, int>> duration;
-	for (auto x : all) duration.push_back (x.second);
-	std::sort (duration.begin (), duration.end (), [](std::pair<int, int> a, std::pair<int, int> b){ return a.second - a.first < b.second - b.first; });	
-	for (auto x : duration) printf ("%d %d\n", x.first, x.second);*/
 

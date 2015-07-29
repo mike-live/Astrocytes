@@ -1,8 +1,9 @@
 #include "astrocyte.h"
 
-astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_name) : file_name (file_name_), my_form (main_form)
+astrocyte::astrocyte(fs::path file_name_, form & main_form, Logger *logg, std::string var_name) :
+file_name(file_name_), logger(logg), my_form(main_form)
 {
-	my_form.status (STR ("File reading..."));
+	logger->Info(STR ("File reading..."));
 	MATFile * pmat;
 	const char ** dir;
 	const char * name;
@@ -11,7 +12,7 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 	pmat = matOpen (file_name.string().c_str(), "r");
 	if (pmat == NULL) {
 		cout << "Error opening file " << file_name << endl;
-		my_form.status (STR ("Error opening file " + file_name.wstring()));
+		logger->Error(STR ("Error opening file " + file_name.wstring()));
 		return ;
 	}
 
@@ -19,7 +20,7 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 	dir = (const char **)matGetDir (pmat, &ndir);
 	if (dir == NULL) {
 		cout << "Error reading directory of file" << file_name << endl;
-		my_form.status (STR ("Error reading directory of file " + file_name.wstring ()));
+		logger->Error(STR ("Error reading directory of file " + file_name.wstring()));
 		return ;
 	}
 	mxFree (dir);
@@ -27,13 +28,13 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 	// In order to use matGetNextXXX correctly, reopen file to read in headers.
 	if (matClose (pmat) != 0) {
 		cout << "Error closing file " << file_name << endl;
-		my_form.status (STR ("Error closing file " + file_name.wstring ()));
+		logger->Error(STR ("Error closing file " + file_name.wstring()));
 		return ;
 	}
 	pmat = matOpen (file_name.string ().c_str (), "r");
 	if (pmat == NULL) {
 		cout << "Error reopening file " << file_name << endl;
-		my_form.status (STR ("Error reopening file " + file_name.wstring ()));
+		logger->Error(STR ("Error reopening file " + file_name.wstring()));
 		return ;
 	}
 
@@ -42,7 +43,7 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 		pa = matGetNextVariableInfo (pmat, &name);
 		if (pa == NULL) {
 			cout << "Error reading in file " << file_name << endl;
-			my_form.status (STR ("Error reading in file " + file_name.wstring ()));
+			logger->Error(STR ("Error reading in file " + file_name.wstring()));
 			return ;
 		}
 		mxDestroyArray (pa);
@@ -51,13 +52,13 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 	// Reopen file to read in actual arrays.
 	if (matClose (pmat) != 0) {
 		cout << "Error closing file " << file_name << endl;
-		my_form.status (STR ("Error closing file " + file_name.wstring ()));
+		logger->Error(STR ("Error closing file " + file_name.wstring()));
 		return ;
 	}
 	pmat = matOpen (file_name.string ().c_str (), "r");
 	if (pmat == NULL) {
 		cout << "Error reopening file " << file_name << endl;
-		my_form.status (STR ("Error reopening file " + file_name.wstring ()));
+		logger->Error(STR ("Error reopening file " + file_name.wstring()));
 		return ;
 	}
 
@@ -66,7 +67,7 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 		pa = matGetNextVariable (pmat, &name);
 		if (pa == NULL) {
 			cout << "Error reading in file " << file_name << endl;
-			my_form.status (STR ("Error reading in file " + file_name.wstring ()));
+			logger->Error(STR ("Error reading in file " + file_name.wstring()));
 			return ;
 		}
 		int img_type;
@@ -76,22 +77,24 @@ astrocyte::astrocyte (fs::path file_name_, form & main_form, std::string var_nam
 		int num = (int)mxGetNumberOfDimensions (pa);
 		const mwSize *sz = mxGetDimensions (pa);
 		if (std::string (name) == var_name || num == 3 || (num == 4 && sz[2] == 1)) {
-			data = video_data ((uchar *)mxGetData (pa), (int)sz[1], (int)sz[0], (int)((num == 4 && sz[2] == 1) ? sz[3] : sz[2]), img_type);
+			data = video_data ((uchar *)mxGetData (pa), (int)sz[1], (int)sz[0], 
+				(int)((num == 4 && sz[2] == 1) ? sz[3] : sz[2]), img_type);
 			break;
 		}
 	}
 	if (matClose (pmat) != 0) {
 		cout << "Error closing file " << file_name << endl;
-		my_form.status (STR ("Error closing file " + file_name.wstring ()));
+		//my_form.status (STR ("Error closing file " + file_name.wstring ()));
+		logger->Error(STR("Error closing file " + file_name.wstring()));
 		return ;
 	}
-	my_form.status (STR ("File read success!"));
+	logger->Info(STR("File read success!"));
 	return ;
 }
 
 Mat astrocyte::max_thr (bool gauss)
 {
-	my_form.status (STR ("Maximum threshold otsu calculating..."));
+	logger->Info(STR ("Maximum threshold otsu calculating..."));
 	if (thr.empty()) {
 		Mat img_max, img_gauss_max; // intensity.n, intensity.m, intensity.type_size, 0
 		for (int t = 0; t < intensity.nt; t++) {
@@ -125,13 +128,13 @@ void astrocyte::preprocessing ()
 
 void astrocyte::background_subtraction ()
 {
-	//printf ("background_subtraction begin\n");
 	max_thr ();
 
-	my_form.status (STR ("Background subtraction calculating..."));
+	logger->Info(STR ("Background subtraction calculating..."));
 	BackgroundSubtractorMOG bg_model;
 	Mat fgimg;
-	motion = video_data (new uchar[intensity.size], intensity.n, intensity.m, intensity.nt, CV_8U);
+	motion = video_data (new uchar[intensity.size], intensity.n, intensity.m, 
+		intensity.nt, CV_8U);
 	for (int t = 0; t < intensity.nt; t++) {
 		Mat img = intensity.image(t), imgc_max, fgmask, img_thr;
 
@@ -149,15 +152,5 @@ void astrocyte::background_subtraction ()
 		
 		memcpy (motion.frame(t), fgimg.data, motion.nm);
 	}
-	my_form.status (STR ("Background subtraction calculated"));
-	//printf ("background_subtraction end\n");	
+	logger->Info(STR ("Background subtraction calculated"));
 }
-
-
-//Mat img_conc, img_color;
-
-//cvtColor (fgimg, img_color, CV_GRAY2BGR);
-//conc (img_thr, img_color, img_conc);
-//imshow ("asdf", img_conc);
-//imwrite (path + "\\" + std::to_string (i) + ".bmp", img_conc);
-//waitKey ();
