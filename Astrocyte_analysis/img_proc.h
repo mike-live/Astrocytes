@@ -1,10 +1,12 @@
 /*
 img_proc - модуль, содержащий обертки для функций обработки изображений
 */
+
 #pragma once
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
 #include "config.h"
 
 using namespace cv;

@@ -32,10 +32,13 @@
   <ItemGroup>
     <ClInclude Include="astrocyte.h" />
     <ClInclude Include="auxiliaries.h" />
+    <ClInclude Include="clusters_form.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="declaration.h" />
     <ClInclude Include="experiments.h" />
+    <ClInclude Include="form_logger.h" />
     <ClInclude Include="img_proc.h" />
+    <ClInclude Include="logger.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="tmp.txt" />
@@ -110,7 +113,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2011a\extern\lib\win64\microsoft</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\MATLAB\R2010a\extern\lib\win64\microsoft</AdditionalLibraryDirectories>
       <AdditionalDependencies>libmx.lib;libeng.lib;libmex.lib;libmat.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -137,13 +140,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OPENCV_ROOT)/include/;$(BOOST_ROOT);$(MATLAB_ROOT)/include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\dependencies\include\opencv2;..\dependencies\include\boost;c:\Program Files\MATLAB\R2010a\extern\include\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(BOOST_ROOT)/lib/$(Platform);$(OPENCV_ROOT)/x64/vc12/lib;$(MATLAB_ROOT)/lib/win64/microsoft;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\dependencies\lib;c:\Program Files\MATLAB\R2010a\extern\lib\win64\microsoft\</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_contrib2410.lib;libmx.lib;libeng.lib;libmex.lib;libmat.lib;opencv_video2410.lib;opencv_core2410.lib;opencv_highgui2410.lib;opencv_imgproc2410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -154,16 +157,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\dependencies\include\opencv2;..\dependencies\include\boost;c:\Program Files\MATLAB\R2010a\extern\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>
-      </AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\dependencies\lib;c:\Program Files\MATLAB\R2010a\extern\lib\win64\microsoft\</AdditionalLibraryDirectories>
       <AdditionalDependencies>nana_$(Configuration)_$(PlatformShortName).lib;opencv_contrib2410.lib;libmx.lib;libeng.lib;libmex.lib;libmat.lib;opencv_video2410.lib;opencv_core2410.lib;opencv_highgui2410.lib;opencv_imgproc2410.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
