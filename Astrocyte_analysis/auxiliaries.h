@@ -20,7 +20,7 @@ auxiliaries - модуль, который включает набор вспомогательных функций
 
 //#include <mat.h>
 #include "declaration.h"
-using namespace std;
+using namespace std; 
 using namespace cv;
 
 /*int read (const char *file, string var_name, mxArray * &pa, video_data & astro);

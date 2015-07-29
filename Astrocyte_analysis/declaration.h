@@ -20,9 +20,11 @@
 #include <nana/gui/widgets/label.hpp>
 #include <nana/gui/widgets/panel.hpp>
 #include <nana/gui/widgets/checkbox.hpp>
+#include <nana/gui/widgets/textbox.hpp>
+#include <nana/gui/widgets/slider.hpp>
 #include <nana/gui/filebox.hpp>
 
-//#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp> 
 
 #include "config.h"
 //#include "img_proc.h"

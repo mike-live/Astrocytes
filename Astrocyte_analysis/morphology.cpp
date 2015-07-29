@@ -2,8 +2,7 @@
 
 vector<vector<Point>> & astrocyte::find_morphology ()
 {
-	max_thr ();
-	if (contours.empty()) findContours (thr_gauss, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+	if (contours.empty ()) findContours (max_thr (), contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 	return contours;
 }
 
@@ -28,7 +27,7 @@ void astrocyte::draw_morphology (fs::path file_name, bool video)
 	// Create a video file
 	VideoWriter video_writer (file_name.string(), -1, 2, Size (intensity.n, intensity.m));
 	
-	// Draw countours	
+	// Draw countours
 	for (int t = 0; t < intensity.nt; t++) {
 		Mat img = intensity.image(t), img_morph;
 		applyColorMap (img, img_morph, COLORMAP_JET);
@@ -36,4 +35,4 @@ void astrocyte::draw_morphology (fs::path file_name, bool video)
 		//imwrite (to_string (i) + ".bmp", img_morph);
 		if (video) video_writer.write (img_morph);
 	}
-}
+} 
